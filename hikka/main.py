@@ -222,7 +222,7 @@ def gen_port(cfg: str = "port", no8080: bool = False) -> int:
     # First, try to randomly get port
     while port := random.randint(1024, 65536):
         if socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect_ex(
-            ("localhost", port)
+            ("0.0.0.0", port)
         ):
             break
 
