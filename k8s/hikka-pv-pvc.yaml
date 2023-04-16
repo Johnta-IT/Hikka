@@ -1,0 +1,31 @@
+# PV
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: hikka-pv
+spec:
+  capacity:
+    storage: 6Gi
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: hostpath
+  hostPath:
+    path: /run/desktop/mnt/host/f/kubernetes-volumes/hikka           # Путь где будет создан Volume В РОДИТЕЛЬСКОЙ ОС!
+
+---
+
+# PVC
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: hikka-pvc
+spec:
+  volumeName: hikka-pv
+  storageClassName: hostpath
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 6Gi              # Сколько ресурсов будет запрошено у pv

@@ -136,3 +136,11 @@ Check out <a href="https://dev.hikka.pw">dev.hikka.pw</a> for developers' docume
     <li><a href="https://t.me/lonami">Lonami</a> for Telethon, which is the base of Hikka-TL</li>
     <li><a href="https://github.com/delivrance">Dan</a> for pyrogram, which is the base of Hikka-Pyro</li>
 </ul>
+
+<br/>
+
+## Kubernetes deployment
+For deployment in k8s you need to create container (upload it to DockerHub or other Image Registry an configure k8s to pull images from it) and set its `docker image name` in `k8s/hikka-deploy.yaml` as well as set Telegram Bot API KEY (has to be encoded in `base64`) in `k8s/hikka-secret.yaml` in `HIKKA_BOT_API_KEY` variable.
+
+## Environment variables
+- HIKKA_BOT_API_KEY - variable that stores Telegram Bot API KEY

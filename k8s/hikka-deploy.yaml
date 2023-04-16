@@ -1,0 +1,75 @@
+##########################################
+#             Веб приложение
+##########################################
+
+# Описание деплоймента 
+apiVersion: apps/v1                     # Версия API (обязательное поле)
+kind: StatefulSet                        # Тип создаваемого объекта (обязательное поле)
+metadata:                               # Данные, позволяющие идентифицировать объект (name, UID и необязательное поле namespace) (обязательное поле)
+  name: hikka-pod
+  labels:
+    app: hikka-pod
+spec:                                   # Требуемое состояние объекта (обязательное поле)
+  replicas: 1                           # Кол-во копий пода (в одном поде может быть несколько контейнеров)
+  #minReadySeconds: 2                    # Промежуток между моментами создания подов
+  progressDeadlineSeconds: 600          # Макс. время деплоя в сек. (после - под помечается как failed)
+  selector:
+    matchLabels:
+      pod: hikka-pod         # Селектор подов для развёртывания. Нужно имя пода (должно совпадать с template.metadata.labels.app в apps/v1)
+  template:
+    metadata:
+      labels:
+        pod: hikka-pod       # Имя пода
+    spec:
+      #affinity:
+      hostNetwork: false                # Открыть ли порты пода для доступа извне
+      #nodeName:                        # Под будет разворачиваться только на ноде с определённым именем
+      containers:                       # Список контейнеров внутри пода
+      - name: hikka-pod      # Имя контейнера (DNS_LABEL)
+        image: IMAGE_NAME          # Образ контейнера
+        lifecycle:
+          postStart:
+            exec:
+              command: ["/bin/sh", "data/Hikka/auth-script.sh"]
+        #args:                          # Аргументы для запуска контейнера
+        env:                            # Переменные окружения для контейнера
+        - name: HIKKA_BOT_API_KEY
+          valueFrom:                    # Вместо value используется valueFrom
+            secretKeyRef:               # Ключевое слово
+              name: hikka-sercret     # Имя секрета   
+              key: HIKKA_BOT_API_KEY
+        ports:                          # Массив портов которые нужно открыть поду
+        - containerPort: 3429
+          name: "https-port1"             # Имя порта. Если портов несколько - имя для каждого ОБЯЗАТЕЛЬНО
+        - containerPort: 8080
+          name: "https-port2"             # Имя порта. Если портов несколько - имя для каждого ОБЯЗАТЕЛЬНО
+        resources:                      # Ресурсы машины для контейнера
+          requests:                     # Целевые ресурсы машины
+            memory: "400Mi"
+            cpu: "500m"
+          limits:                       # Максимальные машины
+              memory: "600Mi"
+              cpu: "1000m"
+      #volumes:
+      imagePullSecrets:                 # Credentials для DockerHub (для скачки образа контейнера с реестра (приватных) контейнеров)
+      - name: hikka-secret     # Имя Credential секрета (создаётся командой 'kubectl create secret docker-registry 'ИМЯ'')
+
+
+---
+
+# Сервис для телеграм бота
+# Сервис для прямого доступа к поду бота(пока без ингресса)
+apiVersion: v1                                          # Версия API
+kind: Service                                           # Тип объекта
+metadata:
+  name: hikka-service                        # Имя сервиса
+spec:
+  selector:
+    app: hikka-pod                           # На какой под направлять трафик (поиск по имени)
+  ports:
+    - protocol: TCP                                     # Протокол
+      port: 3429                                          # Внешний порт сервиса
+      targetPort: https-port1                             # Порт на который будет идти трафик внутри подов strm/helloworld-http
+    - protocol: TCP                                     # Протокол
+      port: 8080                                          # Внешний порт сервиса
+      targetPort: https-port2                             # Порт на который будет идти трафик внутри подов strm/helloworld-http
