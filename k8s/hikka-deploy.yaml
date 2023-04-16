@@ -30,7 +30,7 @@ spec:                                   # Требуемое состояние 
         lifecycle:
           postStart:
             exec:
-              command: ["/bin/sh", "data/Hikka/auth-script.sh"]
+              command: ["/bin/sh", "/data/Hikka/auth-script.sh"]
         #args:                          # Аргументы для запуска контейнера
         env:                            # Переменные окружения для контейнера
         - name: HIKKA_BOT_API_KEY
@@ -50,9 +50,13 @@ spec:                                   # Требуемое состояние 
           limits:                       # Максимальные машины
               memory: "600Mi"
               cpu: "1000m"
-      #volumes:
-      imagePullSecrets:                 # Credentials для DockerHub (для скачки образа контейнера с реестра (приватных) контейнеров)
-      - name: hikka-secret     # Имя Credential секрета (создаётся командой 'kubectl create secret docker-registry 'ИМЯ'')
+        volumeMounts:
+        - mountPath: "/var/opt/hikka/data"      # Путь ВНУТРИ КОНТЕЙНЕРА где будет volume
+          name: hikka-storage
+      volumes:
+      - name: hikka-storage
+        persistentVolumeClaim:
+          claimName: hikka-pvc
 
 
 ---
