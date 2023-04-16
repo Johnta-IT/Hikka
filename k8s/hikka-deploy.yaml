@@ -51,7 +51,7 @@ spec:                                   # Требуемое состояние 
               memory: "600Mi"
               cpu: "1000m"
         volumeMounts:
-        - mountPath: "/var/opt/hikka/data"      # Путь ВНУТРИ КОНТЕЙНЕРА где будет volume
+        - mountPath: "/data/Hikka"      # Путь ВНУТРИ КОНТЕЙНЕРА где будет volume
           name: hikka-storage
       volumes:
       - name: hikka-storage
